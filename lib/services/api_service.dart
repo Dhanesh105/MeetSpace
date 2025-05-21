@@ -5,7 +5,10 @@ import '../utils/api_exception.dart';
 
 class ApiService {
   // Base URL for the API - change this to match your backend URL
-  static const String baseUrl = 'http://localhost:4321';
+  static const String baseUrl = 'https://meet-space-backend-1.vercel.app';
+
+  // Local development URL (uncomment for local testing)
+  // static const String baseUrl = 'http://localhost:4322';
 
   // Headers for API requests
   final Map<String, String> _headers = {
@@ -17,7 +20,7 @@ class ApiService {
   Future<List<Booking>> getBookings() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/bookings'),
+        Uri.parse('$baseUrl/api/bookings'),
         headers: _headers,
       );
 
@@ -36,7 +39,7 @@ class ApiService {
   Future<Booking> getBookingById(String id) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/bookings/$id'),
+        Uri.parse('$baseUrl/api/bookings/$id'),
         headers: _headers,
       );
 
@@ -53,7 +56,7 @@ class ApiService {
   Future<Booking> createBooking(Booking booking) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/bookings'),
+        Uri.parse('$baseUrl/api/bookings'),
         headers: _headers,
         body: jsonEncode(booking.toJson()),
       );
@@ -71,7 +74,7 @@ class ApiService {
   Future<Booking> updateBooking(String id, Booking booking) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/bookings/$id'),
+        Uri.parse('$baseUrl/api/bookings/$id'),
         headers: _headers,
         body: jsonEncode(booking.toJson()),
       );
@@ -89,7 +92,7 @@ class ApiService {
   Future<bool> deleteBooking(String id) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/bookings/$id'),
+        Uri.parse('$baseUrl/api/bookings/$id'),
         headers: _headers,
       );
 
@@ -109,7 +112,7 @@ class ApiService {
       final endStr = end.toUtc().toIso8601String();
 
       final response = await http.get(
-        Uri.parse('$baseUrl/bookings?startTime=$startStr&endTime=$endStr'),
+        Uri.parse('$baseUrl/api/bookings?startTime=$startStr&endTime=$endStr'),
         headers: _headers,
       );
 

@@ -66,7 +66,7 @@ class MongoDBStatusIndicator extends StatelessWidget {
                   ),
                   if (error != null && !isConnected)
                     Text(
-                      'Connected to backend server at localhost:4321',
+                      'Connected to backend server at meet-space-backend-1.vercel.app',
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey[600],
