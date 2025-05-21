@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/booking_provider.dart';
-import 'services/room_provider.dart';
-import 'services/mongodb_provider.dart';
-import 'screens/enhanced_home_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/calendar_screen.dart';
-import 'screens/settings_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,12 +12,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => MongoDBProvider()),
-        ChangeNotifierProvider(create: (context) => BookingProvider()),
-        ChangeNotifierProvider(create: (context) => RoomProvider()),
-      ],
+    return ChangeNotifierProvider(
+      create: (context) => BookingProvider(),
       child: MaterialApp(
         title: 'Calendar Booking App',
         debugShowCheckedModeBanner: false,
@@ -30,28 +21,22 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFFF8F9FA),
           colorScheme: const ColorScheme.light(
-            primary: Color(0xFF6366F1),        // Modern indigo
+            primary: Color(0xFF6200EE),        // Deep purple
             onPrimary: Colors.white,
-            primaryContainer: Color(0xFFEEF2FF),
-            secondary: Color(0xFF10B981),      // Emerald green
-            onSecondary: Colors.white,
-            secondaryContainer: Color(0xFFECFDF5),
-            tertiary: Color(0xFFF97316),       // Orange
-            tertiaryContainer: Color(0xFFFFEDD5),
-            surface: Color(0xFFF9FAFB),
-            error: Color(0xFFEF4444),
+            primaryContainer: Color(0xFFE9DDFF),
+            secondary: Color(0xFF03DAC6),      // Teal
+            onSecondary: Colors.black,
+            secondaryContainer: Color(0xFFCEFAF8),
+            tertiary: Color(0xFFFF8A65),       // Coral
+            tertiaryContainer: Color(0xFFFFECE3),
+            surface: Color(0xFFF8F9FA),  // Replace background with surface
+            error: Color(0xFFB00020),
           ),
           appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF6366F1),
+            backgroundColor: Color(0xFF6200EE),
             foregroundColor: Colors.white,
-            elevation: 2,
-            shadowColor: Color(0x40000000),
+            elevation: 0,
             centerTitle: true,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-            ),
           ),
           // Card styling will be applied directly to Card widgets
           inputDecorationTheme: InputDecorationTheme(
@@ -67,41 +52,42 @@ class MyApp extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF6200EE), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
+              borderSide: const BorderSide(color: Color(0xFFB00020), width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFB00020), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             hintStyle: TextStyle(color: Colors.grey.shade400),
-            labelStyle: const TextStyle(color: Color(0xFF6366F1)),
+            labelStyle: const TextStyle(color: Color(0xFF6200EE)),
             floatingLabelStyle: const TextStyle(
-              color: Color(0xFF6366F1),
+              color: Color(0xFF6200EE),
               fontWeight: FontWeight.bold,
             ),
-            prefixIconColor: const Color(0xFF6366F1),
-            suffixIconColor: const Color(0xFF6366F1),
+            prefixIconColor: const Color(0xFF6200EE),
+            suffixIconColor: const Color(0xFF6200EE),
+            // Add shadow to input fields
             isDense: true,
             errorStyle: const TextStyle(
-              color: Color(0xFFEF4444),
+              color: Color(0xFFB00020),
               fontWeight: FontWeight.w500,
             ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
+              backgroundColor: const Color(0xFF6200EE),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 2,
-              shadowColor: const Color(0x406366F1),
+              elevation: 0,
+              shadowColor: Colors.transparent,
               textStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
@@ -110,8 +96,8 @@ class MyApp extends StatelessWidget {
           ),
           outlinedButtonTheme: OutlinedButtonThemeData(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF6366F1),
-              side: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+              foregroundColor: const Color(0xFF6200EE),
+              side: const BorderSide(color: Color(0xFF6200EE), width: 1.5),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -124,7 +110,7 @@ class MyApp extends StatelessWidget {
           ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF6366F1),
+              foregroundColor: const Color(0xFF6200EE),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               textStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -221,12 +207,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const EnhancedHomeScreen(),
-        routes: {
-          '/dashboard': (context) => const DashboardScreen(),
-          '/calendar': (context) => const CalendarScreen(),
-          '/settings': (context) => const SettingsScreen(),
-        },
+        home: const HomeScreen(),
       ),
     );
   }

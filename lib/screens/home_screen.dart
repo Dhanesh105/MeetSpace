@@ -484,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // Modern Navbar - Full width and elegant
                   ModernNavbar(
-                    title: 'MeetSpace',
+                    title: 'Calendar Booking',
                     backgroundColor: Colors.transparent,
                     isTransparent: true,
                     height: isDesktop ? kToolbarHeight + 16 : kToolbarHeight,

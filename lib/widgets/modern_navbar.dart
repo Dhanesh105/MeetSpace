@@ -227,7 +227,7 @@ class ModernNavbar extends StatelessWidget implements PreferredSizeWidget {
             // Optional subtitle for desktop (not shown in compact mode)
             if (isDesktop && !useCompactLayout)
               Text(
-                'Meeting Room Manager',
+                'Booking System',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: textColor.withOpacity(0.8),
                   fontSize: 12,

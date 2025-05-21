@@ -12,7 +12,7 @@ class MongoDBService {
 
   Db? _db;
   bool _isConnected = false;
-  final String _connectionString = 'mongodb://localhost:27017/booking_app';
+  final String _connectionString = 'mongodb+srv://dt418105:WTTLjZDxeGpZSIBW@cluster0.e0hav.mongodb.net/meetspace?retryWrites=true&w=majority&appName=Cluster0';
 
   // Collections
   DbCollection? _bookingsCollection;
