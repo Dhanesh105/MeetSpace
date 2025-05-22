@@ -1,22 +1,13 @@
 #!/bin/bash
 set -e
 
-# Download and install Flutter
-echo "Downloading Flutter..."
-curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.10.5-stable.tar.xz
-echo "Extracting Flutter..."
-tar xf flutter_linux_2.10.5-stable.tar.xz
-export PATH="$PATH:`pwd`/flutter/bin"
+echo "Setting up static web page instead of Flutter build..."
 
-# Verify Flutter installation
-flutter --version
+# Create a directory for the static web files
+mkdir -p build/web
 
-# Enable web
-flutter config --enable-web
-
-# Build the web app
-echo "Building Flutter web app..."
-flutter build web --release
+# Copy the static web files to the build directory
+cp -r static-web/* build/web/
 
 # Create a simple web server script
 cat > server.js << 'EOL'
@@ -42,7 +33,7 @@ if [ ! -f package.json ]; then
 {
   "name": "meetspace",
   "version": "1.0.0",
-  "description": "MeetSpace Flutter Web App",
+  "description": "MeetSpace Static Web App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
