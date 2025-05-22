@@ -495,11 +495,11 @@
                             <label for="roomId">Room</label>
                             <select id="roomId" name="roomId" class="form-control" required>
                                 <option value="">Select a room</option>
-                                <option value="1">Conference Room A</option>
-                                <option value="2">Conference Room B</option>
-                                <option value="3">Meeting Room 101</option>
-                                <option value="4">Executive Suite</option>
-                                <option value="5">Collaboration Space</option>
+                                <option value="Conference Room A">Conference Room A</option>
+                                <option value="Conference Room B">Conference Room B</option>
+                                <option value="Meeting Room 101">Meeting Room 101</option>
+                                <option value="Executive Suite">Executive Suite</option>
+                                <option value="Collaboration Space">Collaboration Space</option>
                             </select>
                         </div>
 
@@ -717,7 +717,9 @@
                         const title = booking.title || 'Untitled Meeting';
                         const start = booking.startTime || booking.start || new Date().toISOString();
                         const end = booking.endTime || booking.end || new Date(new Date(start).getTime() + 3600000).toISOString();
-                        const roomId = booking.roomId || '1';
+
+                        // Handle room information - could be in roomId or room field
+                        const roomIdOrName = booking.room || booking.roomId || 'Conference Room A';
                         const attendees = booking.attendees || 1;
                         const description = booking.description || '';
 
@@ -727,11 +729,11 @@
                             start: start,
                             end: end,
                             extendedProps: {
-                                room: booking.room || getRoomName(roomId),
+                                room: getRoomName(roomIdOrName),
                                 attendees: attendees,
                                 description: description
                             },
-                            backgroundColor: getColorForRoom(roomId)
+                            backgroundColor: getColorForRoom(roomIdOrName)
                         };
                     } catch (err) {
                         console.warn('Error processing booking for calendar:', err, booking);
@@ -747,8 +749,14 @@
             }
         }
 
-        // Get room name from ID
-        function getRoomName(roomId) {
+        // Get room name (or return the same if it's already a name)
+        function getRoomName(roomIdOrName) {
+            // If it's already a room name, return it
+            if (typeof roomIdOrName === 'string' && roomIdOrName.length > 1) {
+                return roomIdOrName;
+            }
+
+            // Otherwise, try to map from ID to name
             const rooms = {
                 '1': 'Conference Room A',
                 '2': 'Conference Room B',
@@ -756,19 +764,35 @@
                 '4': 'Executive Suite',
                 '5': 'Collaboration Space'
             };
-            return rooms[roomId] || 'Unknown Room';
+            return rooms[roomIdOrName] || 'Unknown Room';
         }
 
         // Get color for room
-        function getColorForRoom(roomId) {
-            const colors = {
+        function getColorForRoom(roomIdOrName) {
+            // Map room names to colors
+            const roomColors = {
+                'Conference Room A': '#6366F1', // Indigo
+                'Conference Room B': '#10B981', // Emerald
+                'Meeting Room 101': '#F97316',  // Orange
+                'Executive Suite': '#8B5CF6',   // Purple
+                'Collaboration Space': '#EC4899' // Pink
+            };
+
+            // First try to get color by room name
+            if (roomColors[roomIdOrName]) {
+                return roomColors[roomIdOrName];
+            }
+
+            // If that fails, try the old ID-based approach
+            const idColors = {
                 '1': '#6366F1', // Indigo
                 '2': '#10B981', // Emerald
                 '3': '#F97316', // Orange
                 '4': '#8B5CF6', // Purple
                 '5': '#EC4899'  // Pink
             };
-            return colors[roomId] || '#6B7280';
+
+            return idColors[roomIdOrName] || '#6B7280';
         }
 
         // Update dashboard
@@ -844,15 +868,14 @@
 
             const formData = new FormData(bookingForm);
 
-            // Get room name instead of ID for better compatibility
-            const roomSelect = document.getElementById('roomId');
-            const roomName = roomSelect.options[roomSelect.selectedIndex].text;
+            // Get the selected room value (which is now the room name)
+            const roomName = formData.get('roomId');
 
             // Format the booking data to match the API expectations
             const bookingData = {
                 userId: formData.get('userId'),
-                roomId: formData.get('roomId'),
-                room: roomName,
+                roomId: roomName, // Use the room name as the roomId
+                room: roomName,   // Also include the room name
                 title: formData.get('title'),
                 startTime: new Date(formData.get('startTime')).toISOString(),
                 endTime: new Date(formData.get('endTime')).toISOString(),
