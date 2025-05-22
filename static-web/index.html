@@ -718,8 +718,8 @@
                         const start = booking.startTime || booking.start || new Date().toISOString();
                         const end = booking.endTime || booking.end || new Date(new Date(start).getTime() + 3600000).toISOString();
 
-                        // Handle room information - could be in roomId or room field
-                        const roomIdOrName = booking.room || booking.roomId || 'Conference Room A';
+                        // Only use the room name field
+                        const roomName = booking.room || 'Conference Room A';
                         const attendees = booking.attendees || 1;
                         const description = booking.description || '';
 
@@ -729,11 +729,11 @@
                             start: start,
                             end: end,
                             extendedProps: {
-                                room: getRoomName(roomIdOrName),
+                                room: roomName,
                                 attendees: attendees,
                                 description: description
                             },
-                            backgroundColor: getColorForRoom(roomIdOrName)
+                            backgroundColor: getColorForRoom(roomName)
                         };
                     } catch (err) {
                         console.warn('Error processing booking for calendar:', err, booking);
@@ -827,8 +827,8 @@
                     return startTime < tomorrow && endTime > today;
                 });
 
-                const bookedRoomIds = new Set(todayBookings.map(booking => booking.roomId));
-                const availableRooms = 5 - bookedRoomIds.size;
+                const bookedRooms = new Set(todayBookings.map(booking => booking.room));
+                const availableRooms = 5 - bookedRooms.size;
                 availableRoomsEl.textContent = availableRooms;
 
                 // Update upcoming bookings list
@@ -850,7 +850,7 @@
                         li.innerHTML = `
                             <div class="booking-title">${booking.title}</div>
                             <div class="booking-time">${startTime.toLocaleString()} - ${endTime.toLocaleString()}</div>
-                            <div class="booking-room">${getRoomName(booking.roomId)}</div>
+                            <div class="booking-room">${booking.room || 'Unknown Room'}</div>
                         `;
                         bookingsListEl.appendChild(li);
                     });
@@ -874,8 +874,8 @@
             // Format the booking data to match the API expectations
             const bookingData = {
                 userId: formData.get('userId'),
-                roomId: roomName, // Use the room name as the roomId
-                room: roomName,   // Also include the room name
+                // Don't include roomId at all, just use room name
+                room: roomName,
                 title: formData.get('title'),
                 startTime: new Date(formData.get('startTime')).toISOString(),
                 endTime: new Date(formData.get('endTime')).toISOString(),
