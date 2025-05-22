@@ -674,12 +674,30 @@
         // Fetch bookings from API
         async function fetchBookings() {
             try {
-                const response = await fetch(API_URL);
+                console.log('Fetching bookings from:', API_URL);
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors' // Enable CORS
+                });
+
                 if (!response.ok) {
-                    throw new Error('Failed to fetch bookings');
+                    console.warn('API response not OK:', response.status);
+                    // Try to get error details
+                    try {
+                        const errorData = await response.json();
+                        console.warn('Error details:', errorData);
+                    } catch (e) {
+                        // Ignore if we can't parse the error
+                    }
+                    return [];
                 }
+
                 const data = await response.json();
-                return data;
+                console.log('Bookings fetched successfully:', data.length || 0, 'bookings');
+                return Array.isArray(data) ? data : [];
             } catch (error) {
                 console.error('Error fetching bookings:', error);
                 return [];
@@ -690,22 +708,42 @@
         async function fetchCalendarEvents(info, successCallback, failureCallback) {
             try {
                 const bookings = await fetchBookings();
-                const events = bookings.map(booking => ({
-                    id: booking._id,
-                    title: booking.title,
-                    start: booking.startTime,
-                    end: booking.endTime,
-                    extendedProps: {
-                        room: getRoomName(booking.roomId),
-                        attendees: booking.attendees,
-                        description: booking.description
-                    },
-                    backgroundColor: getColorForRoom(booking.roomId)
-                }));
+
+                // Map bookings to calendar events with error handling for each booking
+                const events = bookings.map(booking => {
+                    try {
+                        // Handle potential missing fields
+                        const id = booking._id || booking.id || `booking-${Math.random().toString(36).substr(2, 9)}`;
+                        const title = booking.title || 'Untitled Meeting';
+                        const start = booking.startTime || booking.start || new Date().toISOString();
+                        const end = booking.endTime || booking.end || new Date(new Date(start).getTime() + 3600000).toISOString();
+                        const roomId = booking.roomId || '1';
+                        const attendees = booking.attendees || 1;
+                        const description = booking.description || '';
+
+                        return {
+                            id: id,
+                            title: title,
+                            start: start,
+                            end: end,
+                            extendedProps: {
+                                room: booking.room || getRoomName(roomId),
+                                attendees: attendees,
+                                description: description
+                            },
+                            backgroundColor: getColorForRoom(roomId)
+                        };
+                    } catch (err) {
+                        console.warn('Error processing booking for calendar:', err, booking);
+                        return null; // Skip this booking
+                    }
+                }).filter(event => event !== null); // Remove any null events
+
+                console.log('Calendar events prepared:', events.length);
                 successCallback(events);
             } catch (error) {
                 console.error('Error fetching calendar events:', error);
-                failureCallback(error);
+                successCallback([]); // Return empty array instead of failing
             }
         }
 
@@ -805,9 +843,16 @@
             e.preventDefault();
 
             const formData = new FormData(bookingForm);
+
+            // Get room name instead of ID for better compatibility
+            const roomSelect = document.getElementById('roomId');
+            const roomName = roomSelect.options[roomSelect.selectedIndex].text;
+
+            // Format the booking data to match the API expectations
             const bookingData = {
                 userId: formData.get('userId'),
                 roomId: formData.get('roomId'),
+                room: roomName,
                 title: formData.get('title'),
                 startTime: new Date(formData.get('startTime')).toISOString(),
                 endTime: new Date(formData.get('endTime')).toISOString(),
@@ -815,22 +860,41 @@
                 description: formData.get('description') || ''
             };
 
+            console.log('Sending booking data:', bookingData);
+
             try {
+                // Show a loading state
+                document.querySelector('.btn-submit').textContent = 'Creating booking...';
+                document.querySelector('.btn-submit').disabled = true;
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify(bookingData)
+                    body: JSON.stringify(bookingData),
+                    mode: 'cors' // Enable CORS
                 });
 
+                // Get the response data
+                let responseData;
+                try {
+                    responseData = await response.json();
+                } catch (e) {
+                    responseData = { message: 'No response data available' };
+                }
+
+                console.log('API response:', response.status, responseData);
+
                 if (!response.ok) {
-                    throw new Error('Failed to create booking');
+                    throw new Error(responseData.message || 'Failed to create booking');
                 }
 
                 // Show success message
                 bookingSuccess.style.display = 'block';
                 bookingError.style.display = 'none';
+                bookingSuccess.textContent = 'Your booking has been successfully created!';
 
                 // Reset form
                 bookingForm.reset();
@@ -838,8 +902,7 @@
                 // Update calendar and dashboard
                 setTimeout(() => {
                     window.location.reload();
-                }, 1000);
-                updateDashboard();
+                }, 2000);
 
                 // Hide success message after 3 seconds
                 setTimeout(() => {
@@ -848,14 +911,19 @@
             } catch (error) {
                 console.error('Error creating booking:', error);
 
-                // Show error message
+                // Show detailed error message
                 bookingError.style.display = 'block';
                 bookingSuccess.style.display = 'none';
+                bookingError.textContent = `Error: ${error.message || 'There was an error creating your booking. Please try again.'}`;
 
-                // Hide error message after 3 seconds
+                // Hide error message after 5 seconds
                 setTimeout(() => {
                     bookingError.style.display = 'none';
-                }, 3000);
+                }, 5000);
+            } finally {
+                // Reset button state
+                document.querySelector('.btn-submit').textContent = 'Create Booking';
+                document.querySelector('.btn-submit').disabled = false;
             }
         });
 
